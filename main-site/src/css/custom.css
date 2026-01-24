@@ -1,0 +1,99 @@
+/**
+ * Custom CSS for Physical AI & Humanoid Robotics Textbook
+ * WCAG 2.1 AA compliant color scheme
+ */
+
+/* Import RTL (Right-to-Left) styles for Urdu translation */
+@import './rtl.css';
+
+:root {
+  /* Primary colors */
+  --ifm-color-primary: #2e7d32;
+  --ifm-color-primary-dark: #1b5e20;
+  --ifm-color-primary-darker: #145216;
+  --ifm-color-primary-darkest: #0d3711;
+  --ifm-color-primary-light: #43a047;
+  --ifm-color-primary-lighter: #4caf50;
+  --ifm-color-primary-lightest: #66bb6a;
+
+  /* Code font */
+  --ifm-code-font-size: 95%;
+  --ifm-font-family-monospace: 'Fira Code', 'Courier New', monospace;
+
+  /* Spacing */
+  --ifm-spacing-horizontal: 1rem;
+  --ifm-navbar-height: 60px;
+}
+
+/* Dark mode */
+[data-theme='dark'] {
+  --ifm-color-primary: #66bb6a;
+  --ifm-color-primary-dark: #4caf50;
+  --ifm-color-primary-darker: #43a047;
+  --ifm-color-primary-darkest: #2e7d32;
+  --ifm-color-primary-light: #81c784;
+  --ifm-color-primary-lighter: #a5d6a7;
+  --ifm-color-primary-lightest: #c8e6c9;
+
+  --ifm-background-color: #1a1a1a;
+  --ifm-background-surface-color: #242424;
+}
+
+/* Custom components */
+.hardware-requirements-table {
+  margin: 2rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hardware-requirements-table th {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.simulation-tabs {
+  margin: 1.5rem 0;
+}
+
+.code-block-with-line-numbers {
+  position: relative;
+}
+
+/* Accessibility enhancements */
+a:focus,
+button:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* Ensure sufficient contrast for code blocks */
+code {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  padding: 0.1rem 0.3rem;
+}
+
+/* Module navigation cards */
+.module-card {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  transition: box-shadow 0.3s ease;
+}
+
+.module-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Admonitions styling */
+.admonition {
+  margin-bottom: 1.5rem;
+}

@@ -1,0 +1,78 @@
+{
+  "name": "physical-ai-robotics-textbook",
+  "version": "1.0.0",
+  "description": "Physical AI & Humanoid Robotics course textbook built with Docusaurus multi-instance architecture",
+  "private": true,
+  "workspaces": [
+    "main-site",
+    "module1-ros2",
+    "module2-simulation",
+    "module3-isaac",
+    "module4-vla",
+    "shared"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace=main-site",
+    "start:main": "npm run start --workspace=main-site",
+    "start:module1": "npm run start --workspace=module1-ros2",
+    "start:module2": "npm run start --workspace=module2-simulation",
+    "start:module3": "npm run start --workspace=module3-isaac",
+    "start:module4": "npm run start --workspace=module4-vla",
+    "build": "npm run build --workspaces --if-present",
+    "build:main": "npm run build --workspace=main-site",
+    "build:module1": "npm run build --workspace=module1-ros2",
+    "build:module2": "npm run build --workspace=module2-simulation",
+    "build:module3": "npm run build --workspace=module3-isaac",
+    "build:module4": "npm run build --workspace=module4-vla",
+    "serve": "npm run serve --workspace=main-site",
+    "clear": "npm run clear --workspaces --if-present",
+    "test:accessibility": "pa11y-ci --config .pa11yci.json",
+    "test:links": "markdown-link-check docs/**/*.md",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.md,.mdx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx,.md,.mdx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,mdx,json,css}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,md,mdx,json,css}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/[org]/physical-ai-textbook.git"
+  },
+  "keywords": [
+    "robotics",
+    "physical-ai",
+    "ros2",
+    "docusaurus",
+    "textbook",
+    "education",
+    "humanoid-robotics",
+    "nvidia-isaac",
+    "gazebo",
+    "unity"
+  ],
+  "author": "Physical AI Course Team",
+  "license": "CC-BY-4.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "axe-core": "^4.10.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-mdx": "^3.1.5",
+    "eslint-plugin-react": "^7.37.2",
+    "markdown-link-check": "^3.12.2",
+    "pa11y-ci": "^3.1.0",
+    "prettier": "^3.4.2"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/plugin-ideal-image": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@easyops-cn/docusaurus-search-local": "^0.52.2",
+    "@saucelabs/theme-github-codeblock": "^0.3.0",
+    "docusaurus-prince-pdf": "^1.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

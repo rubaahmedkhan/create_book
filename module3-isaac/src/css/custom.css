@@ -1,0 +1,18 @@
+/**
+ * Module 3: NVIDIA Isaac - Custom CSS
+ */
+
+:root {
+  --ifm-color-primary: #76b900;
+  --ifm-color-primary-dark: #6aa500;
+  --ifm-color-primary-darker: #5f9400;
+  --ifm-color-primary-darkest: #4d7a00;
+  --ifm-color-primary-light: #88d100;
+  --ifm-color-primary-lighter: #9ae600;
+  --ifm-color-primary-lightest: #b3ff1a;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #88d100;
+  --ifm-background-color: #1a1a1a;
+}

@@ -1,0 +1,133 @@
+# GitHub Actions Workflow for Multi-Instance Docusaurus Deployment
+# Deploys main-site + all module sites to GitHub Pages
+# Copy this file to .github/workflows/deploy.yml
+
+name: Deploy Multi-Instance Docusaurus to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  # Increase Node memory for large builds
+  NODE_OPTIONS: --max_old_space_size=8192
+
+jobs:
+  # Build all Docusaurus instances
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build all sites in parallel using npm workspaces
+      - name: Build main-site
+        run: npm run build --workspace=main-site
+
+      - name: Build module1-ros2
+        run: npm run build --workspace=module1-ros2
+
+      - name: Build module2-simulation
+        run: npm run build --workspace=module2-simulation
+
+      - name: Build module3-isaac
+        run: npm run build --workspace=module3-isaac
+
+      - name: Build module4-vla
+        run: npm run build --workspace=module4-vla
+
+      # Merge all builds into single output directory
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p ./deploy
+
+          # Copy main site as root
+          cp -r ./main-site/build/* ./deploy/
+
+          # Copy modules to their subdirectories
+          mkdir -p ./deploy/module1
+          mkdir -p ./deploy/module2
+          mkdir -p ./deploy/module3
+          mkdir -p ./deploy/module4
+
+          cp -r ./module1-ros2/build/* ./deploy/module1/
+          cp -r ./module2-simulation/build/* ./deploy/module2/
+          cp -r ./module3-isaac/build/* ./deploy/module3/
+          cp -r ./module4-vla/build/* ./deploy/module4/
+
+          # Create .nojekyll to bypass Jekyll processing
+          touch ./deploy/.nojekyll
+
+          # List structure for verification
+          echo "=== Deployment Structure ==="
+          ls -la ./deploy/
+          echo "=== Module directories ==="
+          ls -la ./deploy/module1/ || true
+          ls -la ./deploy/module2/ || true
+          ls -la ./deploy/module3/ || true
+          ls -la ./deploy/module4/ || true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./deploy
+
+  # Deploy to GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Your sites are now available at:" >> $GITHUB_STEP_SUMMARY
+          echo "- Main Site: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Module 1: ${{ steps.deployment.outputs.page_url }}module1/" >> $GITHUB_STEP_SUMMARY
+          echo "- Module 2: ${{ steps.deployment.outputs.page_url }}module2/" >> $GITHUB_STEP_SUMMARY
+          echo "- Module 3: ${{ steps.deployment.outputs.page_url }}module3/" >> $GITHUB_STEP_SUMMARY
+          echo "- Module 4: ${{ steps.deployment.outputs.page_url }}module4/" >> $GITHUB_STEP_SUMMARY

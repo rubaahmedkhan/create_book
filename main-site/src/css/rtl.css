@@ -1,0 +1,229 @@
+/* RTL (Right-to-Left) Styles for Urdu Translation Feature
+ * Feature: 002-urdu-translation
+ * Purpose: Apply RTL text direction while preserving LTR for code blocks and technical content
+ */
+
+/* ========================================
+   BASE RTL STYLES
+   ======================================== */
+
+/* Apply RTL direction to HTML when Urdu locale is active */
+html[dir='rtl'] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* ========================================
+   CODE BLOCK LTR PRESERVATION
+   ======================================== */
+
+/* Keep code blocks LTR even in RTL mode */
+html[dir='rtl'] pre,
+html[dir='rtl'] code,
+html[dir='rtl'] .prism-code {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: embed;
+}
+
+/* Preserve code block containers */
+html[dir='rtl'] .codeBlockContainer_Ckt0,
+html[dir='rtl'] div[class*='codeBlock'] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* ========================================
+   NAVIGATION & UI COMPONENT MIRRORING
+   ======================================== */
+
+/* Mirror navbar items */
+html[dir='rtl'] .navbar__item {
+  margin-right: 0;
+  margin-left: var(--ifm-navbar-item-padding-horizontal);
+}
+
+/* Mirror navbar logo */
+html[dir='rtl'] .navbar__brand {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* ========================================
+   SIDEBAR MIRRORING
+   ======================================== */
+
+/* Mirror sidebar border */
+html[dir='rtl'] .theme-doc-sidebar-container {
+  border-left: 1px solid var(--ifm-toc-border-color);
+  border-right: none;
+}
+
+/* Mirror sidebar menu items */
+html[dir='rtl'] .menu__list-item {
+  padding-left: 0;
+  padding-right: var(--ifm-menu-link-padding-horizontal);
+}
+
+/* Mirror sidebar item padding */
+html[dir='rtl'] .menu__link {
+  padding-right: var(--ifm-menu-link-padding-horizontal);
+  padding-left: var(--ifm-menu-link-padding-horizontal);
+}
+
+/* ========================================
+   TABLE OF CONTENTS (TOC) MIRRORING
+   ======================================== */
+
+/* Mirror table of contents */
+html[dir='rtl'] .table-of-contents {
+  padding-left: 0;
+  padding-right: var(--ifm-toc-padding-horizontal);
+}
+
+html[dir='rtl'] .table-of-contents__link {
+  padding-right: 0.5rem;
+  padding-left: 0;
+}
+
+/* ========================================
+   BREADCRUMBS MIRRORING
+   ======================================== */
+
+/* Mirror breadcrumbs separator */
+html[dir='rtl'] .breadcrumbs__item::before {
+  margin-left: 0.5rem;
+  margin-right: 0;
+  transform: rotate(180deg);
+}
+
+html[dir='rtl'] .breadcrumbs__item:not(:first-child)::before {
+  content: '‹';
+}
+
+/* ========================================
+   PAGINATION MIRRORING
+   ======================================== */
+
+/* Mirror pagination links */
+html[dir='rtl'] .pagination-nav__link {
+  text-align: right;
+}
+
+html[dir='rtl'] .pagination-nav__sublabel {
+  text-align: right;
+}
+
+/* Reverse pagination arrows */
+html[dir='rtl'] .pagination-nav__link--next .pagination-nav__label::after {
+  content: '←';
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+html[dir='rtl'] .pagination-nav__link--prev .pagination-nav__label::before {
+  content: '→';
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+/* ========================================
+   MATH & DIAGRAM LTR PRESERVATION
+   ======================================== */
+
+/* Preserve mathematical notation and diagrams as LTR */
+html[dir='rtl'] .math,
+html[dir='rtl'] .katex,
+html[dir='rtl'] .katex-display,
+html[dir='rtl'] .MathJax {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Preserve diagrams and images */
+html[dir='rtl'] svg,
+html[dir='rtl'] .diagram,
+html[dir='rtl'] .mermaid {
+  direction: ltr;
+}
+
+/* ========================================
+   SEARCH BAR MIRRORING (if present)
+   ======================================== */
+
+html[dir='rtl'] .navbar__search {
+  margin-left: 0;
+  margin-right: var(--ifm-navbar-item-padding-horizontal);
+}
+
+html[dir='rtl'] .navbar__search-input {
+  padding-right: 2rem;
+  padding-left: var(--ifm-navbar-padding-horizontal);
+  text-align: right;
+}
+
+/* ========================================
+   TABLE RTL SUPPORT
+   ======================================== */
+
+html[dir='rtl'] table {
+  direction: rtl;
+}
+
+/* Keep code columns in tables as LTR */
+html[dir='rtl'] table code,
+html[dir='rtl'] table pre {
+  direction: ltr;
+  text-align: left;
+}
+
+/* ========================================
+   ADMONITIONS & CALLOUTS
+   ======================================== */
+
+html[dir='rtl'] .admonition {
+  text-align: right;
+}
+
+html[dir='rtl'] .admonition-icon {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* ========================================
+   FOOTER MIRRORING
+   ======================================== */
+
+html[dir='rtl'] .footer {
+  text-align: right;
+}
+
+html[dir='rtl'] .footer__links {
+  text-align: right;
+}
+
+/* ========================================
+   ADDITIONAL UTILITY STYLES
+   ======================================== */
+
+/* Preserve URLs and file paths as LTR */
+html[dir='rtl'] a[href^="http"],
+html[dir='rtl'] a[href^="/"],
+html[dir='rtl'] .filepath,
+html[dir='rtl'] .url {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Preserve version badges */
+html[dir='rtl'] .badge {
+  direction: ltr;
+}
+
+/* Preserve command-line examples */
+html[dir='rtl'] .cli,
+html[dir='rtl'] .terminal,
+html[dir='rtl'] kbd {
+  direction: ltr;
+  unicode-bidi: embed;
+}

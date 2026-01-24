@@ -1,0 +1,113 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+package-lock.json
+
+# Docusaurus
+.docusaurus/
+.cache-loader/
+build/
+*/build/
+*/.docusaurus/
+*/.cache-loader/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+.temp/
+.tmp/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Build artifacts
+dist/
+*.tgz
+
+# Misc
+.cache/
+.parcel-cache/
+.next/
+out/
+
+# Accessibility testing reports
+pa11y-results/
+axe-reports/
+
+# PDF generation
+*.pdf
+!static/**/*.pdf
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Git
+*.orig
+*.rej
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+pip-log.txt
+pip-delete-this-directory.txt

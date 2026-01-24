@@ -1,0 +1,18 @@
+/**
+ * Module 4: VLA - Custom CSS
+ */
+
+:root {
+  --ifm-color-primary: #f57c00;
+  --ifm-color-primary-dark: #e67000;
+  --ifm-color-primary-darker: #d66600;
+  --ifm-color-primary-darkest: #c25e00;
+  --ifm-color-primary-light: #ff8f00;
+  --ifm-color-primary-lighter: #ff9800;
+  --ifm-color-primary-lightest: #ffa726;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #ff9800;
+  --ifm-background-color: #1a1a1a;
+}

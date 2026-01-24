@@ -1,0 +1,377 @@
+/**
+ * LanguageToggle Component Styles
+ * Feature: 002-urdu-translation
+ *
+ * Provides styling for language selection buttons and dropdown with RTL support.
+ */
+
+/* ============================================
+   Base Container Styles
+   ============================================ */
+
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ifm-font-family-base);
+}
+
+/* ============================================
+   Position-specific Styles
+   ============================================ */
+
+/* Chapter start position (constitutional requirement) */
+.language-toggle--chapter-start {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  justify-content: flex-start;
+}
+
+/* Header position */
+.language-toggle--header {
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar position */
+.language-toggle--sidebar {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+/* ============================================
+   Button Mode Styles
+   ============================================ */
+
+.language-toggle--button {
+  flex-wrap: wrap;
+}
+
+.language-toggle__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+  background-color: var(--ifm-button-background-color);
+  border: 1px solid var(--ifm-button-border-color);
+  border-radius: var(--ifm-button-border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.language-toggle__button:hover {
+  background-color: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.language-toggle__button:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.language-toggle__button:active {
+  transform: translateY(0);
+}
+
+.language-toggle__button--active {
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-font-color-base-inverse);
+  border-color: var(--ifm-color-primary);
+  font-weight: 600;
+  cursor: default;
+}
+
+.language-toggle__button--active:hover {
+  background-color: var(--ifm-color-primary);
+  transform: none;
+  box-shadow: none;
+}
+
+.language-toggle__button:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* RTL-specific button styling */
+.language-toggle__button--rtl {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+/* ============================================
+   Dropdown Mode Styles
+   ============================================ */
+
+.language-toggle--dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.language-toggle__dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+  background-color: var(--ifm-button-background-color);
+  border: 1px solid var(--ifm-button-border-color);
+  border-radius: var(--ifm-button-border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+}
+
+.language-toggle__dropdown-trigger:hover {
+  background-color: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-primary);
+}
+
+.language-toggle__dropdown-trigger:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.language-toggle__dropdown-trigger[aria-expanded='true'] {
+  background-color: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-primary);
+}
+
+.language-toggle__dropdown-arrow {
+  transition: transform 0.2s ease-in-out;
+}
+
+.language-toggle__dropdown-trigger[aria-expanded='true'] .language-toggle__dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.language-toggle__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 12rem;
+  background-color: var(--ifm-dropdown-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--ifm-global-shadow-lw);
+  padding: 0.5rem 0;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RTL dropdown positioning */
+html[dir='rtl'] .language-toggle__dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+.language-toggle__dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  font-size: 0.9rem;
+  color: var(--ifm-font-color-base);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.language-toggle__dropdown-option:hover {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.language-toggle__dropdown-option:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: -2px;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.language-toggle__dropdown-option--active {
+  background-color: var(--ifm-color-emphasis-200);
+  font-weight: 600;
+}
+
+.language-toggle__dropdown-option--rtl {
+  direction: rtl;
+  unicode-bidi: embed;
+  text-align: right;
+}
+
+/* RTL dropdown option alignment */
+html[dir='rtl'] .language-toggle__dropdown-option {
+  text-align: right;
+}
+
+.language-toggle__checkmark {
+  margin-left: auto;
+  color: var(--ifm-color-primary);
+}
+
+/* RTL checkmark positioning */
+html[dir='rtl'] .language-toggle__checkmark {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* ============================================
+   Shared Elements
+   ============================================ */
+
+.language-toggle__flag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.language-toggle__label {
+  display: inline-block;
+}
+
+.language-toggle__current-label {
+  font-weight: 500;
+}
+
+/* ============================================
+   Translation Status Indicator (User Story 4)
+   ============================================ */
+
+.language-toggle__status-hint {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ifm-color-secondary);
+  background-color: var(--ifm-color-emphasis-100);
+  border-radius: var(--ifm-global-radius);
+}
+
+/* ============================================
+   Dark Mode Adjustments
+   ============================================ */
+
+html[data-theme='dark'] .language-toggle__button {
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+html[data-theme='dark'] .language-toggle__button:hover {
+  background-color: var(--ifm-color-emphasis-300);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+html[data-theme='dark'] .language-toggle__dropdown-trigger {
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+html[data-theme='dark'] .language-toggle__dropdown-trigger:hover {
+  background-color: var(--ifm-color-emphasis-300);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+html[data-theme='dark'] .language-toggle__dropdown-menu {
+  background-color: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-emphasis-400);
+}
+
+html[data-theme='dark'] .language-toggle__dropdown-option:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+/* ============================================
+   Accessibility Enhancements
+   ============================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .language-toggle__button,
+  .language-toggle__dropdown-trigger {
+    border-width: 2px;
+  }
+
+  .language-toggle__button--active {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .language-toggle__button,
+  .language-toggle__dropdown-trigger,
+  .language-toggle__dropdown-arrow {
+    transition: none;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Focus visible (keyboard navigation) */
+.language-toggle__button:focus-visible,
+.language-toggle__dropdown-trigger:focus-visible,
+.language-toggle__dropdown-option:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .language-toggle--chapter-start {
+    padding: 0.75rem;
+  }
+
+  .language-toggle__button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .language-toggle__dropdown-menu {
+    min-width: 10rem;
+  }
+
+  .language-toggle__dropdown-option {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Tablet and up */
+@media (min-width: 769px) {
+  .language-toggle--chapter-start {
+    max-width: fit-content;
+  }
+}

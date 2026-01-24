@@ -1,0 +1,18 @@
+/**
+ * Module 2: Simulation - Custom CSS
+ */
+
+:root {
+  --ifm-color-primary: #9c27b0;
+  --ifm-color-primary-dark: #8a24a0;
+  --ifm-color-primary-darker: #7b1fa1;
+  --ifm-color-primary-darkest: #6a1b9a;
+  --ifm-color-primary-light: #ab47bc;
+  --ifm-color-primary-lighter: #ba68c8;
+  --ifm-color-primary-lightest: #ce93d8;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #ba68c8;
+  --ifm-background-color: #1a1a1a;
+}
