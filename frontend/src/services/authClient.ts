@@ -2,17 +2,32 @@
  * Better Auth React Client
  *
  * Provides authentication methods for signup, signin, signout.
- * Uses Better Auth's client SDK to interact with auth-service.
+ * Uses Better Auth's client SDK to interact with /api/auth routes.
  */
 
 import { createAuthClient } from "better-auth/react";
 
-const authUrl = process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000/api/auth";
+function getAuthBaseUrl(): string {
+  // Explicit override (e.g. local dev pointing to separate auth-service)
+  if (process.env.NEXT_PUBLIC_AUTH_URL) {
+    return process.env.NEXT_PUBLIC_AUTH_URL;
+  }
+  // Vercel production / preview URL injected via next.config.js
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/auth`;
+  }
+  // Client-side: resolve relative to current origin
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/api/auth`;
+  }
+  // SSR fallback (local dev)
+  return "http://localhost:3001/api/auth";
+}
 
 export const authClient = createAuthClient({
-  baseURL: authUrl,
+  baseURL: getAuthBaseUrl(),
   fetchOptions: {
-    credentials: "include", // Important: Include cookies in cross-origin requests
+    credentials: "include",
   },
 });
 
@@ -23,7 +38,7 @@ export async function signUp(email: string, password: string, name?: string) {
   return authClient.signUp.email({
     email,
     password,
-    name: name || email.split("@")[0], // Default name to email prefix
+    name: name || email.split("@")[0],
   });
 }
 
@@ -56,5 +71,5 @@ export async function getSession() {
  */
 export async function isAuthenticated(): Promise<boolean> {
   const session = await getSession();
-  return !!session?.user;
+  return !!(session as any)?.data?.user || !!(session as any)?.user;
 }

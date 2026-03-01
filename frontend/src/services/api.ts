@@ -7,7 +7,9 @@
 
 import axios from "axios";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+// In production (Vercel), backend runs as Next.js API routes at /api
+// In local dev, override with NEXT_PUBLIC_API_URL if running FastAPI separately
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export const apiClient = axios.create({
   baseURL: apiUrl,

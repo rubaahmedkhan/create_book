@@ -1,0 +1,480 @@
+openapi: 3.1.0
+info:
+  title: RAG Chatbot API
+  description: |
+    Backend API for the Physical AI & Humanoid Robotics Textbook RAG chatbot.
+    Provides endpoints for interactive question answering with citation support.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.textbook.example.com
+    description: Production server
+
+tags:
+  - name: chat
+    description: Chat and query endpoints
+  - name: health
+    description: Health check and status endpoints
+
+paths:
+  /api/chat/query:
+    post:
+      tags:
+        - chat
+      summary: Submit a question to the chatbot
+      description: |
+        Process a user question and return an answer grounded in textbook content.
+        Supports both general questions and context-specific queries with text selection.
+      operationId: chatQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              generalQuestion:
+                summary: General question without conversation history
+                value:
+                  question: "What is a ROS 2 node?"
+                  conversation_id: null
+                  selected_text: null
+                  page_context: "/docs/module1/week1/ros2-basics"
+              textSelection:
+                summary: Question about selected text
+                value:
+                  question: "Why is inertia important here?"
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                  selected_text: "<inertial>\n  <mass value=\"10.0\"/>\n  <inertia ixx=\"0.5\" iyy=\"0.5\" izz=\"0.5\"/>\n</inertial>"
+                  page_context: "/docs/module2/week4/links-joints"
+              followUp:
+                summary: Follow-up question in conversation
+                value:
+                  question: "Can you explain that in simpler terms?"
+                  conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                  selected_text: null
+                  page_context: "/docs/module1/week2/publishers"
+      responses:
+        '200':
+          description: Successful response with answer and citations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              examples:
+                successfulAnswer:
+                  summary: Answer with citations
+                  value:
+                    answer: "A ROS 2 node is a process that performs computation. Nodes communicate with each other using topics, services, and actions. Each node should have a single, well-defined purpose to follow the single-responsibility principle."
+                    citations:
+                      - source: "Module 1, Week 1, Tutorial 01: ROS 2 Basics (Section: Nodes and Communication)"
+                        url: "/docs/module1/week1/ros2-basics#nodes"
+                        module: "module1-ros2"
+                        week: 1
+                        tutorial_file: "01-ros2-basics.md"
+                        section_title: "Nodes and Communication"
+                        relevance_score: 0.94
+                      - source: "Module 1, Week 2, Tutorial 04: Publishers and Subscribers (Section: Node Structure)"
+                        url: "/docs/module1/week2/publishers#node-structure"
+                        module: "module1-ros2"
+                        week: 2
+                        tutorial_file: "04-publishers.md"
+                        section_title: "Node Structure"
+                        relevance_score: 0.87
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440000"
+                noRelevantContent:
+                  summary: No relevant content found
+                  value:
+                    answer: "I don't have information about that topic in this textbook. Could you rephrase your question or ask about ROS 2, simulation, NVIDIA Isaac, or VLA models?"
+                    citations: []
+                    conversation_id: "550e8400-e29b-41d4-a716-446655440001"
+        '400':
+          description: Bad request (invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Validation error"
+                detail: "Question cannot be empty"
+                code: "INVALID_INPUT"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Rate limit exceeded"
+                detail: "Maximum 10 requests per minute. Please wait before retrying."
+                code: "RATE_LIMIT_EXCEEDED"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Internal server error"
+                detail: "Failed to process query. Please try again."
+                code: "INTERNAL_ERROR"
+        '503':
+          description: Service unavailable (external dependency failure)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Service temporarily unavailable"
+                detail: "Chatbot service is currently unavailable. Please try again shortly."
+                code: "SERVICE_UNAVAILABLE"
+
+  /api/chat/conversations/{conversation_id}:
+    get:
+      tags:
+        - chat
+      summary: Retrieve conversation history
+      description: Get full conversation history with all messages
+      operationId: getConversation
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the conversation
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+          description: Maximum number of messages to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of messages to skip (for pagination)
+      responses:
+        '200':
+          description: Conversation found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Not found"
+                detail: "Conversation with ID 550e8400-e29b-41d4-a716-446655440000 not found"
+                code: "NOT_FOUND"
+
+    delete:
+      tags:
+        - chat
+      summary: Delete conversation and all messages
+      description: Permanently delete a conversation and all associated messages
+      operationId: deleteConversation
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '204':
+          description: Conversation deleted successfully
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check endpoint
+      description: Check if the API and its dependencies are healthy
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "healthy"
+                services:
+                  qdrant: "connected"
+                  neon_postgres: "connected"
+                  openai: "available"
+                timestamp: "2025-12-29T10:30:00Z"
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "unhealthy"
+                services:
+                  qdrant: "disconnected"
+                  neon_postgres: "connected"
+                  openai: "available"
+                timestamp: "2025-12-29T10:30:00Z"
+
+components:
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: The user's question
+          example: "What is a ROS 2 node?"
+        conversation_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID of existing conversation (null for new conversation)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        selected_text:
+          type: string
+          nullable: true
+          maxLength: 5000
+          description: Text selected by user for contextual questions
+          example: "<link name=\"base_link\">\n  <inertial>...</inertial>\n</link>"
+        page_context:
+          type: string
+          nullable: true
+          description: URL path of the page where question was asked
+          example: "/docs/module1/week1/ros2-basics"
+
+    Citation:
+      type: object
+      required:
+        - source
+        - url
+        - module
+        - week
+        - tutorial_file
+        - section_title
+        - relevance_score
+      properties:
+        source:
+          type: string
+          description: Formatted citation text
+          example: "Module 1, Week 1, Tutorial 01: ROS 2 Basics (Section: Nodes)"
+        url:
+          type: string
+          format: uri
+          description: Link to exact textbook section
+          example: "/docs/module1/week1/ros2-basics#nodes"
+        module:
+          type: string
+          description: Module identifier
+          example: "module1-ros2"
+        week:
+          type: integer
+          minimum: 1
+          maximum: 12
+          description: Week number
+          example: 1
+        tutorial_file:
+          type: string
+          description: Tutorial filename
+          example: "01-ros2-basics.md"
+        section_title:
+          type: string
+          description: Section heading title
+          example: "Nodes and Communication"
+        relevance_score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Similarity score from vector search
+          example: 0.94
+
+    QueryResponse:
+      type: object
+      required:
+        - answer
+        - citations
+        - conversation_id
+      properties:
+        answer:
+          type: string
+          description: The chatbot's answer
+          example: "A ROS 2 node is a process that performs computation..."
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+          description: List of citations supporting the answer
+        conversation_id:
+          type: string
+          format: uuid
+          description: UUID of the conversation (new or existing)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    Message:
+      type: object
+      required:
+        - id
+        - role
+        - content
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "660e8400-e29b-41d4-a716-446655440000"
+        role:
+          type: string
+          enum: [user, assistant]
+          example: "user"
+        content:
+          type: string
+          example: "What is a ROS 2 node?"
+        selected_text_context:
+          type: string
+          nullable: true
+          description: Selected text (only for user messages)
+          example: null
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+          nullable: true
+          description: Citations (only for assistant messages)
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-12-29T10:15:30Z"
+
+    ConversationResponse:
+      type: object
+      required:
+        - id
+        - session_id
+        - messages
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        session_id:
+          type: string
+          example: "session-abc123"
+        page_context:
+          type: string
+          nullable: true
+          example: "/docs/module1/week1/ros2-basics"
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-12-29T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-12-29T10:15:30Z"
+        total_messages:
+          type: integer
+          description: Total number of messages in conversation
+          example: 12
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Validation error"
+        detail:
+          type: string
+          nullable: true
+          description: Additional error details
+          example: "Question cannot be empty"
+        code:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - INVALID_INPUT
+            - NOT_FOUND
+            - RATE_LIMIT_EXCEEDED
+            - INTERNAL_ERROR
+            - SERVICE_UNAVAILABLE
+          example: "INVALID_INPUT"
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - services
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          example: "healthy"
+        services:
+          type: object
+          properties:
+            qdrant:
+              type: string
+              enum: [connected, disconnected]
+              example: "connected"
+            neon_postgres:
+              type: string
+              enum: [connected, disconnected]
+              example: "connected"
+            openai:
+              type: string
+              enum: [available, unavailable]
+              example: "available"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-12-29T10:30:00Z"
+
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authenticated requests (future enhancement)
+
+security: []

@@ -89,6 +89,33 @@ axe-reports/
 *.orig
 *.rej
 
+# GitHub Pages build artifacts (built by CI, not source)
+404.html
+sitemap.xml
+assets/
+img/
+intro/
+module1/
+module2/
+module3/
+module4/
+getting-started/
+modules/
+resources/
+ur/
+.nojekyll
+
+# Test/debug files
+*.txt
+*.bat
+*.ps1
+cookies*.txt
+test-*.txt
+flow-*.txt
+
+# TypeScript build info
+*.tsbuildinfo
+
 # Python
 __pycache__/
 *.py[cod]

@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getProfile, UserProfile } from "@/services/api";
 
 // Flash card data for the book topics
-const BASE = "http://localhost:3002/create_book";
+const BASE =
+  process.env.NEXT_PUBLIC_BOOK_URL ?? "https://rubaahmedkhan.github.io/create_book";
 
 const FLASH_CARDS = [
   {
