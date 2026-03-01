@@ -1,0 +1,33 @@
+# FastAPI and ASGI server
+fastapi==0.104.0
+uvicorn[standard]==0.24.0
+
+# Database (Profile API)
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9
+
+# Database (Chatbot API - async postgres)
+asyncpg>=0.29.0
+
+# Vector Database (Chatbot API)
+qdrant-client>=1.7.0
+
+# OpenAI / OpenRouter API (Chatbot API)
+openai>=1.0.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Validation
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# HTTP client for auth-service communication
+httpx==0.25.1
+
+# Development dependencies
+pytest==7.4.3
+pytest-asyncio==0.21.1
+mypy==1.7.1
+ruff==0.1.6
