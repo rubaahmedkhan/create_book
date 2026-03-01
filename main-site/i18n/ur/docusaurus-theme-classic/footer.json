@@ -1,0 +1,54 @@
+{
+  "link.title.Modules": {
+    "message": "Modules",
+    "description": "The title of the footer links column with title=Modules in the footer"
+  },
+  "link.title.Resources": {
+    "message": "Resources",
+    "description": "The title of the footer links column with title=Resources in the footer"
+  },
+  "link.title.More": {
+    "message": "More",
+    "description": "The title of the footer links column with title=More in the footer"
+  },
+  "link.item.label.Module 1: ROS 2 Fundamentals": {
+    "message": "Module 1: ROS 2 Fundamentals",
+    "description": "The label of footer link with label=Module 1: ROS 2 Fundamentals linking to /module1/"
+  },
+  "link.item.label.Module 2: Simulation": {
+    "message": "Module 2: Simulation",
+    "description": "The label of footer link with label=Module 2: Simulation linking to /module2/"
+  },
+  "link.item.label.Module 3: NVIDIA Isaac": {
+    "message": "Module 3: NVIDIA Isaac",
+    "description": "The label of footer link with label=Module 3: NVIDIA Isaac linking to /module3/"
+  },
+  "link.item.label.Module 4: VLA Integration": {
+    "message": "Module 4: VLA Integration",
+    "description": "The label of footer link with label=Module 4: VLA Integration linking to /module4/"
+  },
+  "link.item.label.Code Examples": {
+    "message": "Code Examples",
+    "description": "The label of footer link with label=Code Examples linking to https://github.com/rubaahmedkhan/create_book"
+  },
+  "link.item.label.Assets Repository": {
+    "message": "Assets Repository",
+    "description": "The label of footer link with label=Assets Repository linking to https://github.com/rubaahmedkhan/create_book"
+  },
+  "link.item.label.Student Template": {
+    "message": "Student Template",
+    "description": "The label of footer link with label=Student Template linking to https://github.com/rubaahmedkhan/create_book"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub",
+    "description": "The label of footer link with label=GitHub linking to https://github.com/rubaahmedkhan/create_book"
+  },
+  "link.item.label.License: CC BY 4.0": {
+    "message": "License: CC BY 4.0",
+    "description": "The label of footer link with label=License: CC BY 4.0 linking to https://creativecommons.org/licenses/by/4.0/"
+  },
+  "copyright": {
+    "message": "Licensed under CC BY 4.0. Built with Docusaurus.",
+    "description": "The footer copyright"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "version.label": {
+    "message": "موجودہ",
+    "description": "The label for version current"
+  },
+  "sidebar.mainSidebar.category.Getting Started": {
+    "message": "شروع کریں",
+    "description": "The label for category 'Getting Started' in sidebar 'mainSidebar'"
+  },
+  "sidebar.mainSidebar.category.Course Modules": {
+    "message": "کورس ماڈیولز",
+    "description": "The label for category 'Course Modules' in sidebar 'mainSidebar'"
+  },
+  "sidebar.mainSidebar.category.Resources": {
+    "message": "وسائل",
+    "description": "The label for category 'Resources' in sidebar 'mainSidebar'"
+  },
+  "sidebar.mainSidebar.doc.Course Introduction": {
+    "message": "کورس تعارف",
+    "description": "The label for the doc item 'Course Introduction' in sidebar 'mainSidebar', linking to the doc intro"
+  },
+  "sidebar.module1Sidebar.category.Week 1: ROS 2 Basics": {
+    "message": "ہفتہ 1: ROS 2 بنیادی باتیں",
+    "description": "The label for category 'Week 1: ROS 2 Basics' in sidebar 'module1Sidebar'"
+  },
+  "sidebar.module1Sidebar.category.Week 2: Advanced Concepts": {
+    "message": "ہفتہ 2: ایڈوانسڈ تصورات",
+    "description": "The label for category 'Week 2: Advanced Concepts' in sidebar 'module1Sidebar'"
+  },
+  "sidebar.module1Sidebar.category.Week 3: Package Development": {
+    "message": "ہفتہ 3: پیکج ڈویلپمنٹ",
+    "description": "The label for category 'Week 3: Package Development' in sidebar 'module1Sidebar'"
+  },
+  "sidebar.module1Sidebar.doc.Module 1 Introduction": {
+    "message": "ماڈیول 1 تعارف",
+    "description": "The label for the doc item 'Module 1 Introduction' in sidebar 'module1Sidebar', linking to the doc module1/intro"
+  },
+  "sidebar.module2Sidebar.category.Week 4: URDF & Robot Description": {
+    "message": "ہفتہ 4: URDF اور روبوٹ تفصیل",
+    "description": "The label for category 'Week 4: URDF & Robot Description' in sidebar 'module2Sidebar'"
+  },
+  "sidebar.module2Sidebar.category.Week 5: Gazebo Simulation": {
+    "message": "ہفتہ 5: Gazebo سمیولیشن",
+    "description": "The label for category 'Week 5: Gazebo Simulation' in sidebar 'module2Sidebar'"
+  },
+  "sidebar.module2Sidebar.category.Week 6: Unity Simulation": {
+    "message": "ہفتہ 6: Unity سمیولیشن",
+    "description": "The label for category 'Week 6: Unity Simulation' in sidebar 'module2Sidebar'"
+  },
+  "sidebar.module2Sidebar.doc.Module 2 Introduction": {
+    "message": "ماڈیول 2 تعارف",
+    "description": "The label for the doc item 'Module 2 Introduction' in sidebar 'module2Sidebar', linking to the doc module2/intro"
+  },
+  "sidebar.module3Sidebar.category.Week 7: Isaac Sim Basics": {
+    "message": "ہفتہ 7: Isaac Sim بنیادی باتیں",
+    "description": "The label for category 'Week 7: Isaac Sim Basics' in sidebar 'module3Sidebar'"
+  },
+  "sidebar.module3Sidebar.category.Week 8: Advanced Isaac Sim": {
+    "message": "ہفتہ 8: ایڈوانسڈ Isaac Sim",
+    "description": "The label for category 'Week 8: Advanced Isaac Sim' in sidebar 'module3Sidebar'"
+  },
+  "sidebar.module3Sidebar.category.Week 9: Isaac ROS": {
+    "message": "ہفتہ 9: Isaac ROS",
+    "description": "The label for category 'Week 9: Isaac ROS' in sidebar 'module3Sidebar'"
+  },
+  "sidebar.module3Sidebar.category.Week 10: Nav2 & Sim-to-Real": {
+    "message": "ہفتہ 10: Nav2 اور Sim-to-Real",
+    "description": "The label for category 'Week 10: Nav2 & Sim-to-Real' in sidebar 'module3Sidebar'"
+  },
+  "sidebar.module3Sidebar.doc.Module 3 Introduction": {
+    "message": "ماڈیول 3 تعارف",
+    "description": "The label for the doc item 'Module 3 Introduction' in sidebar 'module3Sidebar', linking to the doc module3/intro"
+  },
+  "sidebar.module4Sidebar.category.Week 11: Voice Processing": {
+    "message": "ہفتہ 11: آواز پروسیسنگ",
+    "description": "The label for category 'Week 11: Voice Processing' in sidebar 'module4Sidebar'"
+  },
+  "sidebar.module4Sidebar.doc.Module 4 Introduction": {
+    "message": "ماڈیول 4 تعارف",
+    "description": "The label for the doc item 'Module 4 Introduction' in sidebar 'module4Sidebar', linking to the doc module4/intro"
+  }
+}

@@ -17,6 +17,24 @@ const LANGUAGE_PREFERENCE_KEY = 'docusaurus.languagePreference';
 // Custom event name for language changes
 const LANGUAGE_CHANGE_EVENT = 'languageChange';
 
+// List of pages that have Urdu translations available
+// Update this list when new translations are added
+const TRANSLATED_PAGES_UR: string[] = [
+  '/',
+  '/intro',
+  '/getting-started/prerequisites',
+  '/getting-started/hardware-requirements',
+  '/getting-started/setup',
+  '/modules/module1-overview',
+  '/modules/module2-overview',
+  '/modules/module3-overview',
+  '/modules/module4-overview',
+  '/module1/intro',
+  '/module2/intro',
+  '/module3/intro',
+  '/module4/intro',
+];
+
 /**
  * Save language preference to localStorage
  *
@@ -171,10 +189,44 @@ export function buildLocalizedUrl(
 }
 
 /**
+ * Check if a page has translation available
+ *
+ * @param pathname - The page path to check
+ * @param locale - The target locale
+ * @param baseUrl - The base URL for the site
+ * @returns true if translation exists
+ */
+export function hasTranslation(pathname: string, locale: string, baseUrl: string = '/'): boolean {
+  if (locale === 'en') {
+    return true; // English always available
+  }
+
+  // Remove baseUrl from pathname, keeping the leading slash
+  let pagePath = pathname;
+  if (baseUrl !== '/' && pathname.startsWith(baseUrl)) {
+    // Use length-1 to preserve the leading '/' (baseUrl ends with '/')
+    pagePath = pathname.slice(baseUrl.length - 1) || '/';
+  }
+
+  // Remove trailing slash for comparison
+  pagePath = pagePath.replace(/\/$/, '') || '/';
+
+  // Check against translated pages list
+  if (locale === 'ur') {
+    return TRANSLATED_PAGES_UR.some(
+      (translatedPath) => pagePath === translatedPath || pagePath === translatedPath.replace(/\/$/, '')
+    );
+  }
+
+  return false;
+}
+
+/**
  * Navigate to localized URL
  *
  * Performs a client-side navigation to the specified locale version
  * of the current page. Updates the browser history.
+ * If the translation doesn't exist, shows an alert to the user.
  *
  * @param locale - The target locale code
  * @param baseUrl - The base URL for the site (default: '/')
@@ -184,7 +236,26 @@ export function navigateToLocale(locale: string, baseUrl: string = '/'): void {
     return;
   }
 
-  const localizedUrl = buildLocalizedUrl(locale, window.location.pathname, baseUrl);
+  const currentPath = window.location.pathname;
+
+  // Check if translation exists for this page
+  if (locale !== 'en' && !hasTranslation(currentPath, locale, baseUrl)) {
+    // Show friendly toast instead of blocking alert
+    const toast = document.createElement('div');
+    toast.style.cssText = [
+      'position:fixed', 'top:20px', 'left:50%', 'transform:translateX(-50%)',
+      'background:#1e293b', 'color:#fff', 'padding:12px 24px',
+      'border-radius:10px', 'font-size:14px', 'z-index:99999',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.35)', 'direction:rtl',
+      'max-width:90vw', 'text-align:center', 'line-height:1.6',
+    ].join(';');
+    toast.textContent = 'اس صفحے کی اردو ترجمہ ابھی دستیاب نہیں ہے';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+    return;
+  }
+
+  const localizedUrl = buildLocalizedUrl(locale, currentPath, baseUrl);
   const fullUrl = `${localizedUrl}${window.location.search}${window.location.hash}`;
 
   window.location.href = fullUrl;
