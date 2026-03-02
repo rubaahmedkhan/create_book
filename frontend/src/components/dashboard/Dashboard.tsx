@@ -76,11 +76,8 @@ export default function Dashboard() {
     try {
       const data = await getProfile();
       setProfile(data);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        window.location.href = "/questionnaire";
-        return;
-      }
+    } catch {
+      // Profile not found or error — show dashboard without personalization
     } finally {
       setLoading(false);
     }
@@ -134,10 +131,10 @@ export default function Dashboard() {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section className="max-w-7xl mx-auto px-6 py-16 flex flex-col lg:flex-row items-center gap-12">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
         {/* Left: Text */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-5xl sm:text-6xl font-black text-gray-900 leading-none tracking-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-none tracking-tight mb-4 sm:mb-6">
             <span className="block">PHYSICAL AI</span>
             <span className="block text-violet-600">&amp; HUMANOID</span>
             <span className="block">ROBOTICS</span>
@@ -193,13 +190,13 @@ export default function Dashboard() {
 
         {/* Right: Book cover */}
         <div className="flex-shrink-0 flex items-center justify-center lg:justify-end">
-          <div style={{ perspective: "1200px" }}>
+          <div className="hidden sm:block" style={{ perspective: "1200px" }}>
             <img
               src="/BOOK_IMG.png"
               alt="Physical AI & Humanoid Robotics Book"
               style={{
-                width: "360px",
-                maxWidth: "90vw",
+                width: "320px",
+                maxWidth: "85vw",
                 borderRadius: "6px 12px 12px 6px",
                 boxShadow:
                   "28px 28px 70px rgba(109,40,217,0.25), -6px 0 20px rgba(0,0,0,0.2), 0 4px 30px rgba(0,0,0,0.15)",
@@ -214,6 +211,17 @@ export default function Dashboard() {
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLImageElement).style.transform =
                   "rotateY(-10deg) rotateX(3deg) scale(1.02)";
+              }}
+            />
+          </div>
+          <div className="sm:hidden">
+            <img
+              src="/BOOK_IMG.png"
+              alt="Physical AI & Humanoid Robotics Book"
+              style={{
+                width: "220px",
+                borderRadius: "6px 12px 12px 6px",
+                boxShadow: "0 8px 30px rgba(109,40,217,0.3)",
               }}
             />
           </div>

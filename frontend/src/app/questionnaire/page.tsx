@@ -1,22 +1,20 @@
 "use client";
 
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import QuestionnaireFlow from "@/components/questionnaire/QuestionnaireFlow";
+import { useEffect } from "react";
 
+// Old questionnaire page — redirect all users to dashboard.
+// The 2-question learning profile is now collected during signup (SignupForm).
 export default function QuestionnairePage() {
+  useEffect(() => {
+    window.location.replace("/dashboard");
+  }, []);
+
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen py-12 px-4">
-        <div className="max-w-3xl mx-auto mb-8">
-          <h1 className="text-3xl font-bold text-center mb-2">
-            Tell Us About Your Background
-          </h1>
-          <p className="text-center text-gray-600">
-            Help us personalize your learning experience by answering a few questions
-          </p>
-        </div>
-        <QuestionnaireFlow />
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600 mb-4" />
+        <p className="text-gray-500 text-sm">Redirecting...</p>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

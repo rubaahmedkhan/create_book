@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://frontend-chi-fawn-17.vercel.app';
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,7 +104,7 @@ export default function ChatBot() {
     } catch (error) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, could not connect to the server. Make sure backend is running on localhost:8000',
+        content: 'Sorry, could not connect to the AI assistant. Please try again in a moment.',
         isError: true,
       }]);
     } finally {
