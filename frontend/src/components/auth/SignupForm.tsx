@@ -104,40 +104,45 @@ export default function SignupForm() {
         advanced: "master_robotics",
       };
 
-      await submitQuestionnaire({
-        background_category: "software",
-        software_experience_years: expMap[skillLevel as SkillLevel],
-        programming_languages: [],
-        frameworks_used: [],
-        development_environments: [hardwareOS],
-        version_control_experience: false,
-        software_projects_completed: 0,
-        hardware_experience_years: 0,
-        microcontrollers_used: [],
-        sensors_actuators_used: [],
-        circuit_design_experience: false,
-        soldering_experience: false,
-        hardware_projects_completed: 0,
-        aiml_experience_years: 0,
-        ml_frameworks_used: [],
-        aiml_concepts_familiar: [],
-        aiml_projects_completed: 0,
-        primary_learning_goal: goalMap[skillLevel as SkillLevel],
-        specific_topics_interested: [],
-        preferred_learning_pace: paceMap[skillLevel as SkillLevel],
-        time_commitment_hours_per_week: 5,
-        project_goals: [],
-      });
+      // Save learning profile — ignore errors (dashboard works without it)
+      try {
+        await submitQuestionnaire({
+          background_category: "software",
+          software_experience_years: expMap[skillLevel as SkillLevel],
+          programming_languages: [],
+          frameworks_used: [],
+          development_environments: [hardwareOS],
+          version_control_experience: false,
+          software_projects_completed: 0,
+          hardware_experience_years: 0,
+          microcontrollers_used: [],
+          sensors_actuators_used: [],
+          circuit_design_experience: false,
+          soldering_experience: false,
+          hardware_projects_completed: 0,
+          aiml_experience_years: 0,
+          ml_frameworks_used: [],
+          aiml_concepts_familiar: [],
+          aiml_projects_completed: 0,
+          primary_learning_goal: goalMap[skillLevel as SkillLevel],
+          specific_topics_interested: [],
+          preferred_learning_pace: paceMap[skillLevel as SkillLevel],
+          time_commitment_hours_per_week: 5,
+          project_goals: [],
+        });
+      } catch {
+        // Profile save failed — continue anyway, dashboard handles missing profile
+      }
 
       window.location.href = "/dashboard";
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || "Signup failed. Please try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md w-full mx-auto bg-white rounded-2xl shadow-lg p-8">
+    <div className="max-w-md w-full mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-8">
       {/* Progress indicator */}
       <div className="flex items-start mb-8">
         <div className="flex flex-col items-center">
@@ -333,14 +338,14 @@ export default function SignupForm() {
             <div className="border-l-4 border-violet-500 pl-3 mb-4 bg-violet-50 py-2 rounded-r-lg">
               <p className="font-semibold text-gray-800 text-sm">What's your software background?</p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2">
               {SKILL_OPTIONS.map((opt) => {
                 const selected = skillLevel === opt.value;
                 return (
                   <button
                     key={opt.value}
                     onClick={() => setSkillLevel(opt.value as SkillLevel)}
-                    className={`p-3 rounded-xl border-2 text-center transition-all ${
+                    className={`p-2 sm:p-3 rounded-xl border-2 text-center transition-all ${
                       selected
                         ? "border-violet-500 bg-violet-50"
                         : "border-gray-200 bg-white hover:border-violet-300"
@@ -354,14 +359,14 @@ export default function SignupForm() {
                       {selected && <div className="w-2 h-2 bg-white rounded-full" />}
                     </div>
                     <p
-                      className={`text-sm font-semibold ${
+                      className={`text-xs sm:text-sm font-semibold ${
                         selected ? "text-violet-700" : "text-gray-700"
                       }`}
                     >
                       {opt.label}
                     </p>
                     <p
-                      className={`text-xs mt-1 leading-snug ${
+                      className={`text-xs mt-0.5 leading-snug hidden sm:block ${
                         selected ? "text-violet-600" : "text-gray-400"
                       }`}
                     >
@@ -378,14 +383,14 @@ export default function SignupForm() {
             <div className="border-l-4 border-violet-500 pl-3 mb-4 bg-violet-50 py-2 rounded-r-lg">
               <p className="font-semibold text-gray-800 text-sm">What hardware and OS do you use?</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {HARDWARE_OPTIONS.map((opt) => {
                 const selected = hardwareOS === opt.value;
                 return (
                   <button
                     key={opt.value}
                     onClick={() => setHardwareOS(opt.value as HardwareOS)}
-                    className={`p-3 rounded-xl border-2 text-left flex items-start gap-3 transition-all ${
+                    className={`p-2 sm:p-3 rounded-xl border-2 text-left flex items-start gap-2 transition-all ${
                       selected
                         ? "border-violet-500 bg-violet-50"
                         : "border-gray-200 bg-white hover:border-violet-300"
