@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Allow calls from GitHub Pages (Docusaurus book) and local dev
 const ALLOWED_ORIGINS = [
   "https://rubaahmedkhan.github.io",
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://localhost:3002",
 ];
 
 function corsHeaders(origin: string | null) {
@@ -23,60 +23,53 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
-  const headers = {
-    ...corsHeaders(origin),
-    "Content-Type": "application/json",
-  };
+  const headers = { ...corsHeaders(origin), "Content-Type": "application/json" };
 
   try {
     const body = await request.json();
     const question = body.question?.trim();
 
     if (!question) {
-      return NextResponse.json(
-        { error: "Question is required" },
-        { status: 400, headers }
-      );
+      return NextResponse.json({ error: "Question is required" }, { status: 400, headers });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        {
-          answer:
-            "The AI assistant is not yet configured. Please add ANTHROPIC_API_KEY to Vercel environment variables.",
-          citations: [],
-        },
+        { answer: "AI assistant is not configured. Contact the administrator.", citations: [] },
         { headers }
       );
     }
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "gpt-4o-mini",
         max_tokens: 1024,
-        system: `You are a helpful AI teaching assistant for a textbook called "Physical AI & Humanoid Robotics".
+        messages: [
+          {
+            role: "system",
+            content: `You are a helpful AI teaching assistant for a textbook called "Physical AI & Humanoid Robotics".
 The textbook covers: ROS 2 fundamentals (nodes, topics, services, actions), Gazebo 3D simulation,
 NVIDIA Isaac platform (GPU-accelerated simulation, reinforcement learning), and Vision-Language-Action (VLA) models.
-Answer student questions concisely and clearly. Use simple language.
+Answer student questions concisely and clearly in simple language.
 If a question is unrelated to robotics or AI, politely guide the student back to the textbook topics.`,
-        messages: [{ role: "user", content: question }],
+          },
+          { role: "user", content: question },
+        ],
       }),
     });
 
     if (!res.ok) {
-      throw new Error(`Anthropic API error: ${res.status}`);
+      throw new Error(`OpenAI API error: ${res.status}`);
     }
 
     const data = await res.json();
-    const answer =
-      data.content?.[0]?.text || "I could not generate a response.";
+    const answer = data.choices?.[0]?.message?.content || "I could not generate a response.";
 
     return NextResponse.json({ answer, citations: [] }, { headers });
   } catch (error) {
