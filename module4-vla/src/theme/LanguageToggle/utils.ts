@@ -123,8 +123,9 @@ export function getLocaleFromPath(pathname?: string): string | null {
 
   const path = pathname || window.location.pathname;
 
-  // Match Docusaurus locale pattern: /[locale]/... or /[locale]
-  const match = path.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)\/?/);
+  // Require a trailing slash or end-of-string after the 2-letter code so that
+  // /create_book/... does NOT incorrectly match 'cr'.
+  const match = path.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)(\/|$)/);
   return match ? match[1] : null;
 }
 
@@ -149,25 +150,31 @@ export function buildLocalizedUrl(
   }
 
   const path = currentPath || window.location.pathname;
-  const currentLocale = getLocaleFromPath(path);
+  const cleanBaseUrl = baseUrl.replace(/\/$/, '');
 
-  let pathWithoutLocale = path;
-
-  // Remove current locale from path if present
-  if (currentLocale) {
-    pathWithoutLocale = path.replace(new RegExp(`^/${currentLocale}(/|$)`), '/');
+  // Strip the baseUrl prefix FIRST so getLocaleFromPath sees /ur/intro, not /module4/ur/intro
+  let relativePath = path;
+  if (cleanBaseUrl && path.startsWith(cleanBaseUrl)) {
+    relativePath = path.slice(cleanBaseUrl.length) || '/';
   }
 
-  // Remove trailing slash from baseUrl if present
-  const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+  // Detect and remove any existing locale prefix from the relative path
+  const currentLocale = getLocaleFromPath(relativePath);
+  if (currentLocale) {
+    relativePath = relativePath.replace(new RegExp(`^/${currentLocale}(/|$)`), '/');
+  }
+
+  if (!relativePath.startsWith('/')) {
+    relativePath = '/' + relativePath;
+  }
 
   // For default locale, don't add locale prefix (Docusaurus convention)
   if (locale === 'en') {
-    return `${cleanBaseUrl}${pathWithoutLocale}`;
+    return `${cleanBaseUrl}${relativePath}`;
   }
 
   // Add new locale prefix
-  return `${cleanBaseUrl}/${locale}${pathWithoutLocale}`;
+  return `${cleanBaseUrl}/${locale}${relativePath}`;
 }
 
 /**

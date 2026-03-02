@@ -22,6 +22,53 @@ import {
   getLocaleFromPath,
 } from '../../LanguageToggle/utils';
 
+/** Skill level section emojis in content headings */
+const LEVEL_EMOJIS: Record<string, string> = {
+  beginner: '🟢',
+  intermediate: '🟡',
+  advanced: '🔴',
+};
+
+/**
+ * Show only the heading sections that match the selected skill level.
+ * Sections are marked by h2 headings containing 🟢 🟡 🔴 emojis.
+ */
+function applySkillLevelFilter(level: string | null): void {
+  const article = document.querySelector('article');
+  if (!article) return;
+
+  const allH2s = Array.from(article.querySelectorAll('h2')) as HTMLElement[];
+  const levelEmojis = Object.values(LEVEL_EMOJIS);
+
+  // Find headings that mark skill-level sections
+  const levelH2s = allH2s.filter((h2) =>
+    levelEmojis.some((e) => h2.textContent?.includes(e))
+  );
+
+  if (levelH2s.length === 0) return; // No level sections in this page — show all
+
+  const targetEmoji = level ? LEVEL_EMOJIS[level] : null;
+
+  levelH2s.forEach((h2) => {
+    const isSelected = targetEmoji ? h2.textContent?.includes(targetEmoji) : true;
+    const display = isSelected ? '' : 'none';
+
+    h2.style.display = display;
+
+    // Hide/show all siblings until the next level-marked h2
+    let sibling = h2.nextElementSibling as HTMLElement | null;
+    while (sibling) {
+      const isNextLevelH2 =
+        sibling.tagName === 'H2' &&
+        levelEmojis.some((e) => sibling.textContent?.includes(e));
+
+      if (isNextLevelH2) break;
+      sibling.style.display = display;
+      sibling = sibling.nextElementSibling as HTMLElement | null;
+    }
+  });
+}
+
 type Props = WrapperProps<typeof DocItemLayoutType>;
 
 /**
@@ -74,7 +121,7 @@ export default function DocItemLayoutWrapper(props: Props): JSX.Element {
       // Apply direction attribute
       applyDirection(newLocaleConfig.direction);
 
-      // Navigate to the new locale
+      // Navigate to the new locale (checks if translation exists)
       navigateToLocale(newLocale, siteConfig.baseUrl);
     },
     [currentLocale, availableLocales, siteConfig.baseUrl]
@@ -86,6 +133,18 @@ export default function DocItemLayoutWrapper(props: Props): JSX.Element {
       applyDirection(currentLocaleConfig.direction);
     }
   }, [currentLocaleConfig]);
+
+  // Apply skill-level content filter on every page render
+  useEffect(() => {
+    const runFilter = () => {
+      const stored = localStorage.getItem('userSkillLevel');
+      applySkillLevelFilter(stored);
+    };
+
+    // Wait for Docusaurus to finish rendering the article content
+    const timer = setTimeout(runFilter, 200);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   return (
     <>

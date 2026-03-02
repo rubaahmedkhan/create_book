@@ -1,0 +1,483 @@
+openapi: 3.0.3
+info:
+  title: Better Auth Service API
+  description: |
+    Authentication service API powered by Better Auth framework.
+    Handles user signup, signin, password management, and session operations.
+
+    All authentication endpoints set httpOnly cookies for session management.
+  version: 1.0.0
+  contact:
+    name: Physical AI Textbook Platform
+
+servers:
+  - url: http://localhost:3000/api/auth
+    description: Local development
+  - url: https://auth.example.com/api/auth
+    description: Production
+
+tags:
+  - name: Authentication
+    description: User authentication operations (signup, signin, signout)
+  - name: Password
+    description: Password management (reset, change)
+  - name: Session
+    description: Session management and validation
+
+paths:
+  /sign-up:
+    post:
+      tags:
+        - Authentication
+      summary: Create new user account
+      description: |
+        Register a new user with email and password.
+        Sets httpOnly session cookie on success.
+        Email verification optional (future enhancement).
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: student@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: SecureP@ssw0rd
+                  description: Minimum 8 characters, mix of uppercase, lowercase, numbers, symbols
+                name:
+                  type: string
+                  example: Jane Doe
+                  description: Optional display name
+      responses:
+        '201':
+          description: User created successfully, session cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: better-auth.session=abc123; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input (malformed email, weak password)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidEmail:
+                  value:
+                    error: "Invalid email address format"
+                weakPassword:
+                  value:
+                    error: "Password must be at least 8 characters with mixed case, numbers, and symbols"
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Email already registered"
+
+  /sign-in:
+    post:
+      tags:
+        - Authentication
+      summary: Sign in existing user
+      description: |
+        Authenticate user with email and password.
+        Creates new session and sets httpOnly cookie.
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: student@example.com
+                password:
+                  type: string
+                  format: password
+                  example: SecureP@ssw0rd
+                rememberMe:
+                  type: boolean
+                  default: false
+                  description: Extend session to 30 days
+      responses:
+        '200':
+          description: Authentication successful, session cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid email or password"
+        '403':
+          description: Email not verified (future enhancement)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Please verify your email before signing in"
+
+  /sign-out:
+    post:
+      tags:
+        - Authentication
+      summary: Sign out current user
+      description: |
+        Invalidate current session and clear session cookie.
+        Requires valid session cookie.
+      operationId: signOut
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successfully signed out
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: better-auth.session=; HttpOnly; Secure; SameSite=Lax; Max-Age=0
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /session:
+    get:
+      tags:
+        - Session
+      summary: Get current session
+      description: |
+        Retrieve current user session and user data.
+        Validates session cookie and returns user information.
+      operationId: getSession
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Active session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: No active session or session expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "No active session"
+
+  /forget-password:
+    post:
+      tags:
+        - Password
+      summary: Request password reset
+      description: |
+        Send password reset email to user.
+        Creates verification token in database.
+      operationId: forgetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: student@example.com
+      responses:
+        '200':
+          description: Password reset email sent (always returns 200 for security)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "If the email exists, a password reset link has been sent"
+        '400':
+          description: Invalid email format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reset-password:
+    post:
+      tags:
+        - Password
+      summary: Reset password with token
+      description: |
+        Reset user password using token from email.
+        Invalidates all existing sessions for security.
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                  example: abc123xyz789
+                  description: Token from password reset email
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: NewSecureP@ss
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid or expired token, or weak password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidToken:
+                  value:
+                    error: "Invalid or expired reset token"
+                weakPassword:
+                  value:
+                    error: "Password must be at least 8 characters with mixed case, numbers, and symbols"
+
+  /change-password:
+    post:
+      tags:
+        - Password
+      summary: Change password for authenticated user
+      description: |
+        Change password while authenticated.
+        Requires current password for verification.
+        Invalidates all other sessions for security.
+      operationId: changePassword
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  example: OldP@ssw0rd
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: NewSecureP@ss
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Current password incorrect or not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: Weak new password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: better-auth.session
+      description: HttpOnly session cookie set by Better Auth
+
+  schemas:
+    AuthResponse:
+      type: object
+      required:
+        - user
+        - session
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - emailVerified
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: student@example.com
+        emailVerified:
+          type: boolean
+          example: false
+        name:
+          type: string
+          nullable: true
+          example: Jane Doe
+        image:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/avatar.jpg
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-30T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-12-30T10:00:00Z"
+
+    Session:
+      type: object
+      required:
+        - id
+        - userId
+        - expiresAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: sess_abc123xyz789
+        userId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2026-01-29T10:00:00Z"
+          description: 30 days from creation
+        ipAddress:
+          type: string
+          nullable: true
+          example: 192.168.1.1
+        userAgent:
+          type: string
+          nullable: true
+          example: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-30T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-12-30T10:00:00Z"
+
+    SessionResponse:
+      type: object
+      required:
+        - user
+        - session
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: An error occurred
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details (validation errors, etc.)

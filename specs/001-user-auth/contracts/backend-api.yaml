@@ -1,0 +1,729 @@
+openapi: 3.0.3
+info:
+  title: Textbook Platform Backend API
+  description: |
+    FastAPI backend for user profile management, background questionnaire,
+    and GDPR compliance operations.
+
+    Validates authentication by checking session table shared with Better Auth.
+  version: 1.0.0
+  contact:
+    name: Physical AI Textbook Platform
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+  - url: https://api.example.com/api
+    description: Production
+
+tags:
+  - name: Questionnaire
+    description: Background questionnaire operations
+  - name: Profile
+    description: User profile management
+  - name: GDPR
+    description: Data export and deletion requests
+
+paths:
+  /questionnaire:
+    post:
+      tags:
+        - Questionnaire
+      summary: Submit background questionnaire
+      description: |
+        Submit completed background questionnaire after signup.
+        Creates user_profile and questionnaire_response records.
+        Calculates initial skill level (beginner/intermediate/advanced).
+
+        Requires valid session cookie from Better Auth.
+      operationId: submitQuestionnaire
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireSubmission'
+      responses:
+        '201':
+          description: Questionnaire submitted successfully, profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid questionnaire data or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingRequired:
+                  value:
+                    error: "At least one of software_background or hardware_background is required"
+                    details:
+                      missing_fields: ["software_experience_years", "hardware_experience"]
+        '401':
+          description: Not authenticated or invalid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Profile already exists for this user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "User profile already exists"
+
+    get:
+      tags:
+        - Questionnaire
+      summary: Get questionnaire responses
+      description: |
+        Retrieve user's historical questionnaire responses for audit/review.
+        Returns all answered questions grouped by category.
+      operationId: getQuestionnaireResponses
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Questionnaire responses retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+                  responses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuestionnaireResponse'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Get user profile
+      description: |
+        Retrieve authenticated user's profile including skill level
+        and all background information.
+      operationId: getProfile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Profile not found (questionnaire not completed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Profile not found. Please complete the background questionnaire."
+
+    patch:
+      tags:
+        - Profile
+      summary: Update user profile
+      description: |
+        Update user's background information or learning goals.
+        Recalculates skill level if background fields changed.
+        Creates new questionnaire_response entries for audit trail.
+      operationId: updateProfile
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid update data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /gdpr/export:
+    post:
+      tags:
+        - GDPR
+      summary: Request data export
+      description: |
+        Request export of all user data (GDPR right to data portability).
+        Creates gdpr_request record. Background job generates JSON file.
+        Returns request ID for tracking. Export ready within 24 hours.
+      operationId: requestDataExport
+      security:
+        - cookieAuth: []
+      responses:
+        '202':
+          description: Data export request accepted and queued
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - requestId
+                  - status
+                  - message
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                  status:
+                    type: string
+                    example: pending
+                  message:
+                    type: string
+                    example: "Data export request received. You will receive an email when ready."
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /gdpr/export/{requestId}:
+    get:
+      tags:
+        - GDPR
+      summary: Get data export status
+      description: |
+        Check status of data export request.
+        Returns download URL when export is completed.
+      operationId: getExportStatus
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Export status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GDPRRequest'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Export request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /gdpr/delete:
+    post:
+      tags:
+        - GDPR
+      summary: Request account deletion
+      description: |
+        Request permanent deletion of account and all data
+        (GDPR right to be forgotten).
+
+        30-day waiting period before deletion is executed.
+        User can cancel during this period.
+
+        Requires password confirmation for security.
+      operationId: requestAccountDeletion
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+                - confirmDeletion
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: Current password for confirmation
+                confirmDeletion:
+                  type: boolean
+                  description: Must be true to confirm deletion intent
+                  example: true
+      responses:
+        '202':
+          description: Deletion request accepted, scheduled for 30 days
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - requestId
+                  - scheduledFor
+                  - message
+                properties:
+                  requestId:
+                    type: string
+                    format: uuid
+                  scheduledFor:
+                    type: string
+                    format: date-time
+                    description: Deletion execution date (30 days from now)
+                    example: "2026-01-29T10:00:00Z"
+                  message:
+                    type: string
+                    example: "Account deletion scheduled for 2026-01-29. You can cancel anytime before this date."
+        '400':
+          description: Invalid request or confirmation not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated or incorrect password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /gdpr/delete/{requestId}/cancel:
+    post:
+      tags:
+        - GDPR
+      summary: Cancel pending account deletion
+      description: |
+        Cancel a pending deletion request before the 30-day deadline.
+        Only works if deletion has not been executed yet.
+      operationId: cancelAccountDeletion
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Deletion request cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Account deletion cancelled. Your account remains active."
+        '400':
+          description: Deletion already executed or invalid state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Deletion request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: better-auth.session
+      description: Session cookie validated against shared database
+
+  schemas:
+    QuestionnaireSubmission:
+      type: object
+      description: Complete background questionnaire submission
+      required:
+        - software_background
+        - hardware_background
+        - aiml_background
+        - learning_goals
+      properties:
+        software_background:
+          type: object
+          properties:
+            experience_years:
+              type: integer
+              minimum: 0
+              maximum: 50
+              example: 3
+            programming_languages:
+              type: array
+              items:
+                type: string
+              example: ["Python", "JavaScript", "C++"]
+            python_proficiency:
+              type: string
+              enum: [none, basic, intermediate, advanced]
+              example: intermediate
+            cpp_proficiency:
+              type: string
+              enum: [none, basic, intermediate, advanced]
+              example: basic
+            ros_exposure:
+              type: boolean
+              example: false
+        hardware_background:
+          type: object
+          properties:
+            experience_level:
+              type: string
+              enum: [none, hobbyist, professional]
+              example: hobbyist
+            robotics_hardware:
+              type: array
+              items:
+                type: string
+              example: ["Arduino", "Raspberry Pi"]
+            sensor_integration_exp:
+              type: boolean
+              example: true
+            robot_deployment_exp:
+              type: boolean
+              example: false
+        aiml_background:
+          type: object
+          properties:
+            ml_frameworks:
+              type: array
+              items:
+                type: string
+              example: ["TensorFlow", "PyTorch"]
+            computer_vision_exp:
+              type: boolean
+              example: true
+            llm_familiarity:
+              type: string
+              enum: [none, basic, intermediate, advanced]
+              example: intermediate
+        learning_goals:
+          type: object
+          properties:
+            career_objectives:
+              type: string
+              example: "Transition to robotics engineering role"
+            robotics_domains_interest:
+              type: array
+              items:
+                type: string
+              example: ["Autonomous Vehicles", "Humanoid Robots"]
+            learning_pace:
+              type: string
+              enum: [self-paced, structured, intensive]
+              example: structured
+
+    UserProfile:
+      type: object
+      required:
+        - id
+        - userId
+        - skillLevel
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+          description: Links to Better Auth user.id
+        skillLevel:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          example: intermediate
+          description: Calculated from questionnaire responses
+        softwareExperienceYears:
+          type: integer
+          nullable: true
+          example: 3
+        programmingLanguages:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example: ["Python", "JavaScript"]
+        pythonProficiency:
+          type: string
+          enum: [none, basic, intermediate, advanced]
+          nullable: true
+          example: intermediate
+        cppProficiency:
+          type: string
+          enum: [none, basic, intermediate, advanced]
+          nullable: true
+          example: basic
+        rosExposure:
+          type: boolean
+          example: false
+        hardwareExperience:
+          type: string
+          enum: [none, hobbyist, professional]
+          nullable: true
+          example: hobbyist
+        roboticsHardware:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example: ["Arduino"]
+        sensorIntegrationExp:
+          type: boolean
+          example: true
+        robotDeploymentExp:
+          type: boolean
+          example: false
+        mlFrameworks:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example: ["TensorFlow"]
+        computerVisionExp:
+          type: boolean
+          example: true
+        llmFamiliarity:
+          type: string
+          enum: [none, basic, intermediate, advanced]
+          nullable: true
+          example: intermediate
+        careerObjectives:
+          type: string
+          nullable: true
+          example: "Transition to robotics engineering"
+        roboticsDomainsInterest:
+          type: array
+          items:
+            type: string
+          nullable: true
+          example: ["Autonomous Vehicles"]
+        learningPace:
+          type: string
+          enum: [self-paced, structured, intensive]
+          nullable: true
+          example: structured
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProfileUpdate:
+      type: object
+      description: Partial profile update (only include fields being changed)
+      properties:
+        software_background:
+          type: object
+          properties:
+            experience_years:
+              type: integer
+              minimum: 0
+            programming_languages:
+              type: array
+              items:
+                type: string
+            python_proficiency:
+              type: string
+              enum: [none, basic, intermediate, advanced]
+            cpp_proficiency:
+              type: string
+              enum: [none, basic, intermediate, advanced]
+            ros_exposure:
+              type: boolean
+        hardware_background:
+          type: object
+          properties:
+            experience_level:
+              type: string
+              enum: [none, hobbyist, professional]
+            robotics_hardware:
+              type: array
+              items:
+                type: string
+            sensor_integration_exp:
+              type: boolean
+            robot_deployment_exp:
+              type: boolean
+        aiml_background:
+          type: object
+          properties:
+            ml_frameworks:
+              type: array
+              items:
+                type: string
+            computer_vision_exp:
+              type: boolean
+            llm_familiarity:
+              type: string
+              enum: [none, basic, intermediate, advanced]
+        learning_goals:
+          type: object
+          properties:
+            career_objectives:
+              type: string
+            robotics_domains_interest:
+              type: array
+              items:
+                type: string
+            learning_pace:
+              type: string
+              enum: [self-paced, structured, intensive]
+
+    QuestionnaireResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - questionId
+        - questionCategory
+        - responseValue
+        - answeredAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        questionId:
+          type: string
+          example: "software_exp_years"
+        questionCategory:
+          type: string
+          enum: [software, hardware, aiml, goals]
+        responseValue:
+          description: JSONB field - can be string, number, array, or object
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: array
+              items: {}
+            - type: object
+        isRequired:
+          type: boolean
+        answeredAt:
+          type: string
+          format: date-time
+
+    GDPRRequest:
+      type: object
+      required:
+        - id
+        - userId
+        - requestType
+        - status
+        - requestedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        requestType:
+          type: string
+          enum: [export, deletion]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        requestedAt:
+          type: string
+          format: date-time
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+        exportFileUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Download URL (only for export requests, expires after 7 days)
+        deletionScheduledFor:
+          type: string
+          format: date-time
+          nullable: true
+          description: Scheduled deletion date (only for deletion requests)
+        errorMessage:
+          type: string
+          nullable: true
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: An error occurred
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context (validation errors, field issues, etc.)
