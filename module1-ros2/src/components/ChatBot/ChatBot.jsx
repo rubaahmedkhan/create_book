@@ -104,7 +104,7 @@ export default function ChatBot() {
     } catch (error) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, could not connect to the AI assistant. Please try again in a moment.',
+        content: '🚧 AI Chatbot is coming soon! Our intelligent assistant is currently being set up. Please check back later.',
         isError: true,
       }]);
     } finally {
